@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce Platform</title>
+    <link rel="stylesheet" href="cloud.css">
+</head>
+
+<body>
+    <header>
+        <h1>E-Shop</h1>
+        <nav>
+            <ul>
+                <li><a href="#products">Products</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="products">
+            <h2>Products</h2>
+            <input type="text" id="searchBar" placeholder="Search for products..." onkeyup="searchProducts()">
+            <div id="productGrid" class="product-grid"></div>
+        </section>
+ 
+        <section id="about">
+            <h2>About Us</h2>
+            <p>We provide the best products at the best prices!</p>
+        </section>
+
+        <section id="contact">
+            <h2>Contact Us</h2>
+            <form id="contactForm">
+                <input type="text" placeholder="Your Name" required>
+                <input type="email" placeholder="Your Email" required>
+                <textarea placeholder="Your Message" required></textarea>
+                <button type="submit">Send Message</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 E-Shop. All rights reserved.</p>
+    </footer>
+ 
+    <script>
+        async function fetchProducts() {
+            const response = await fetch('http://localhost:3000/api/v1/products');
+            const products = await response.json();
+            displayProducts(products);
+        }
+
+        function displayProducts(products) {
+            const productGrid = document.getElementById('productGrid');
+            productGrid.innerHTML = '';
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.classList.add('product-card');
+                productCard.innerHTML = `
+                    <h3>${product.name}</h3>
+                    <p>Price: $${product.price}</p>
+                    <button onclick="addToCart(${product.id})">Add to Cart</button>
+                `;
+                productGrid.appendChild(productCard);
+            });
+        }
+
+        function searchProducts() {
+            const input = document.getElementById('searchBar').value.toLowerCase();
+            const productCards = document.querySelectorAll('.product-card');
+            productCards.forEach(card => {
+                const productName = card.querySelector('h3').textContent.toLowerCase();
+                card.style.display = productName.includes(input) ? 'block' : 'none';
+            });
+        }
+
+        function addToCart(productId) {
+            alert(`Added product ${productId} to cart!`); // Implement cart logic as needed
+        }
+
+        window.onload = fetchProducts;
+    </script>
+</body>
+
+</html>
