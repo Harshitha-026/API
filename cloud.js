@@ -2,15 +2,10 @@ const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// MongoDB URI and Database
-const uri = 'mongodb://localhost:27017'; // MongoDB URI (local instance)
-const dbName = 'storeDB'; // Database name
-
-// MongoDB collections
+const uri = 'mongodb://localhost:27017'; 
+const dbName = 'storeDB'; 
 let db, productsCollection, ordersCollection;
 
-// Connect to MongoDB
 MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(client => {
         db = client.db(dbName);
@@ -20,9 +15,8 @@ MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
     })
     .catch(err => console.error('Error connecting to MongoDB:', err));
 
-app.use(express.json()); // For parsing application/json
+app.use(express.json()); 
 
-// Get all products with optional filters (category, price range)
 app.get('/api/v1/products', async (req, res) => {
     const { category, minPrice, maxPrice } = req.query;
 
@@ -39,7 +33,6 @@ app.get('/api/v1/products', async (req, res) => {
     }
 });
 
-// Create a new product
 app.post('/api/v1/products', async (req, res) => {
     const { name, price, description, category, stock } = req.body;
 
@@ -57,7 +50,6 @@ app.post('/api/v1/products', async (req, res) => {
     }
 });
 
-// Update an existing product by ID
 app.put('/api/v1/products/:id', async (req, res) => {
     const { id } = req.params;
     const { name, price, description, category, stock } = req.body;
@@ -83,7 +75,6 @@ app.put('/api/v1/products/:id', async (req, res) => {
     }
 });
 
-// Delete a product by ID
 app.delete('/api/v1/products/:id', async (req, res) => {
     const { id } = req.params;
 
@@ -98,20 +89,16 @@ app.delete('/api/v1/products/:id', async (req, res) => {
     }
 });
 
-// Create a new order
 app.post('/api/v1/orders', async (req, res) => {
     const { productIds, customerId } = req.body;
     
     try {
-        // Fetch the products to check their availability
         const products = await productsCollection.find({ _id: { $in: productIds.map(id => ObjectId(id)) } }).toArray();
         
-        // Check if any product is out of stock
         if (products.some(product => product.stock <= 0)) {
             return res.status(400).json({ message: "One or more products are out of stock." });
         }
 
-        // Create a new order
         const newOrder = {
             customerId,
             products: products.map(product => product._id),
@@ -125,7 +112,6 @@ app.post('/api/v1/orders', async (req, res) => {
     }
 });
 
-// Get an order by ID
 app.get('/api/v1/orders/:id', async (req, res) => {
     const { id } = req.params;
 
@@ -140,7 +126,6 @@ app.get('/api/v1/orders/:id', async (req, res) => {
     }
 });
 
-// Get all orders for a specific customer
 app.get('/api/v1/customers/:customerId/orders', async (req, res) => {
     const { customerId } = req.params;
 
@@ -152,7 +137,6 @@ app.get('/api/v1/customers/:customerId/orders', async (req, res) => {
     }
 });
 
-// Update the status of an order by ID
 app.put('/api/v1/orders/:id/status', async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
@@ -171,7 +155,6 @@ app.put('/api/v1/orders/:id/status', async (req, res) => {
     }
 });
 
-// Delete an order by ID
 app.delete('/api/v1/orders/:id', async (req, res) => {
     const { id } = req.params;
 
@@ -186,7 +169,6 @@ app.delete('/api/v1/orders/:id', async (req, res) => {
     }
 });
 
-// Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
